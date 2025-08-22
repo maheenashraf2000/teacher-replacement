@@ -1,0 +1,320 @@
+import { ThemedText } from '@/components/ThemedText';
+import { ThemedView } from '@/components/ThemedView';
+import { IconSymbol } from '@/components/ui/IconSymbol';
+import React, { useState } from 'react';
+import { Alert, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+
+interface Teacher {
+  id: string;
+  name: string;
+  subject: string;
+  availability: 'available' | 'busy' | 'unavailable';
+  rating: number;
+  experience: string;
+}
+
+export default function TeacherManagementScreen() {
+  const [teachers, setTeachers] = useState<Teacher[]>([
+    {
+      id: '1',
+      name: 'Ms. Sarah Johnson',
+      subject: 'Mathematics',
+      availability: 'available',
+      rating: 4.8,
+      experience: '8 years'
+    },
+    {
+      id: '2',
+      name: 'Mr. Michael Davis',
+      subject: 'Science',
+      availability: 'available',
+      rating: 4.6,
+      experience: '12 years'
+    },
+    {
+      id: '3',
+      name: 'Mrs. Emily Wilson',
+      subject: 'English',
+      availability: 'busy',
+      rating: 4.9,
+      experience: '15 years'
+    },
+    {
+      id: '4',
+      name: 'Dr. Robert Chen',
+      subject: 'Physics',
+      availability: 'available',
+      rating: 4.7,
+      experience: '10 years'
+    },
+    {
+      id: '5',
+      name: 'Ms. Lisa Rodriguez',
+      subject: 'History',
+      availability: 'unavailable',
+      rating: 4.5,
+      experience: '6 years'
+    }
+  ]);
+
+  const getAvailabilityColor = (availability: string) => {
+    switch (availability) {
+      case 'available': return '#4CAF50';
+      case 'busy': return '#FF9800';
+      case 'unavailable': return '#F44336';
+      default: return '#999';
+    }
+  };
+
+  const getAvailabilityText = (availability: string) => {
+    switch (availability) {
+      case 'available': return 'Available';
+      case 'busy': return 'Busy';
+      case 'unavailable': return 'Unavailable';
+      default: return 'Unknown';
+    }
+  };
+
+  const handleAssignTeacher = (teacher: Teacher) => {
+    if (teacher.availability === 'available') {
+      Alert.alert(
+        'Assign Teacher',
+        `Assign ${teacher.name} to the replacement request?`,
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Assign', onPress: () => {
+            Alert.alert('Success', `${teacher.name} has been assigned!`);
+          }}
+        ]
+      );
+    } else {
+      Alert.alert('Teacher Unavailable', `${teacher.name} is currently ${teacher.availability}`);
+    }
+  };
+
+  const handleFilterBySubject = (subject: string) => {
+    Alert.alert('Filter', `Filtering by ${subject}`);
+  };
+
+  return (
+    <ScrollView style={styles.container}>
+      <ThemedView style={styles.header}>
+        <ThemedText type="title">Teacher Management</ThemedText>
+        <ThemedText type="subtitle">Find and assign replacement teachers</ThemedText>
+      </ThemedView>
+
+      <ThemedView style={styles.filterSection}>
+        <ThemedText type="subtitle" style={styles.filterTitle}>Filter by Subject</ThemedText>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll}>
+          {['All', 'Mathematics', 'Science', 'English', 'Physics', 'History'].map((subject) => (
+            <TouchableOpacity
+              key={subject}
+              style={styles.filterChip}
+              onPress={() => handleFilterBySubject(subject)}
+            >
+              <ThemedText style={styles.filterChipText}>{subject}</ThemedText>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+      </ThemedView>
+
+      <ThemedView style={styles.statsContainer}>
+        <ThemedView style={styles.statCard}>
+          <ThemedText type="title" style={styles.statNumber}>
+            {teachers.filter(t => t.availability === 'available').length}
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>Available</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.statCard}>
+          <ThemedText type="title" style={styles.statNumber}>
+            {teachers.filter(t => t.availability === 'busy').length}
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>Busy</ThemedText>
+        </ThemedView>
+        <ThemedView style={styles.statCard}>
+          <ThemedText type="title" style={styles.statNumber}>
+            {teachers.filter(t => t.availability === 'unavailable').length}
+          </ThemedText>
+          <ThemedText style={styles.statLabel}>Unavailable</ThemedText>
+        </ThemedView>
+      </ThemedView>
+
+      <ThemedView style={styles.section}>
+        <ThemedText type="subtitle" style={styles.sectionTitle}>Available Teachers</ThemedText>
+        {teachers.map((teacher) => (
+          <ThemedView key={teacher.id} style={styles.teacherCard}>
+            <ThemedView style={styles.teacherHeader}>
+              <ThemedView>
+                <ThemedText type="defaultSemiBold" style={styles.teacherName}>
+                  {teacher.name}
+                </ThemedText>
+                <ThemedText style={styles.teacherSubject}>{teacher.subject}</ThemedText>
+              </ThemedView>
+              <ThemedView style={[styles.availabilityBadge, { backgroundColor: getAvailabilityColor(teacher.availability) }]}>
+                <ThemedText style={styles.availabilityText}>{getAvailabilityText(teacher.availability)}</ThemedText>
+              </ThemedView>
+            </ThemedView>
+            
+            <ThemedView style={styles.teacherDetails}>
+              <ThemedView style={styles.detailRow}>
+                <IconSymbol name="star.fill" size={16} color="#FFD700" />
+                <ThemedText style={styles.detailText}>{teacher.rating} Rating</ThemedText>
+              </ThemedView>
+              <ThemedView style={styles.detailRow}>
+                <IconSymbol name="clock.fill" size={16} color="#2196F3" />
+                <ThemedText style={styles.detailText}>{teacher.experience} Experience</ThemedText>
+              </ThemedView>
+            </ThemedView>
+
+            <TouchableOpacity
+              style={[
+                styles.assignButton,
+                { backgroundColor: teacher.availability === 'available' ? '#4CAF50' : '#ccc' }
+              ]}
+              onPress={() => handleAssignTeacher(teacher)}
+              disabled={teacher.availability !== 'available'}
+            >
+              <ThemedText style={styles.assignButtonText}>
+                {teacher.availability === 'available' ? 'Assign' : 'Unavailable'}
+              </ThemedText>
+            </TouchableOpacity>
+          </ThemedView>
+        ))}
+      </ThemedView>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f5f5f5',
+  },
+  header: {
+    padding: 20,
+    backgroundColor: '#FF9800',
+    alignItems: 'center',
+  },
+  filterSection: {
+    padding: 20,
+    backgroundColor: 'white',
+    marginBottom: 10,
+  },
+  filterTitle: {
+    marginBottom: 15,
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  filterScroll: {
+    flexDirection: 'row',
+  },
+  filterChip: {
+    backgroundColor: '#E3F2FD',
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#2196F3',
+  },
+  filterChipText: {
+    color: '#2196F3',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingHorizontal: 20,
+    marginBottom: 20,
+  },
+  statCard: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    minWidth: 80,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+  },
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FF9800',
+  },
+  statLabel: {
+    fontSize: 12,
+    color: '#666',
+    marginTop: 5,
+  },
+  section: {
+    padding: 20,
+  },
+  sectionTitle: {
+    marginBottom: 15,
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  teacherCard: {
+    backgroundColor: 'white',
+    padding: 15,
+    borderRadius: 10,
+    marginBottom: 15,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.22,
+    shadowRadius: 2.22,
+  },
+  teacherHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 15,
+  },
+  teacherName: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  teacherSubject: {
+    fontSize: 14,
+    color: '#666',
+  },
+  availabilityBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 15,
+  },
+  availabilityText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  teacherDetails: {
+    marginBottom: 15,
+  },
+  detailRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  detailText: {
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 8,
+  },
+  assignButton: {
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  assignButtonText: {
+    color: 'white',
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+});
